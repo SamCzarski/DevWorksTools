@@ -1,0 +1,8 @@
+CA_NAME: (Czarski)Dev Root CA
+SERVER_CN: localhost
+KEYSTORE_ALIAS: dev-localhost-cert
+# DAYS_CA: 5 years
+DAYS_CA: 1825
+# DAYS_SERVER: ~2 years 3 months
+DAYS_SERVER: 825
+OUTDIR: certs
