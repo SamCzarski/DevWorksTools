@@ -1,0 +1,73 @@
+serve:
+  public:
+    host: 0.0.0.0
+    port: 4444
+    tls:
+      enabled: true
+      cert:
+        path: /certs/server-fullchain.crt
+      key:
+        path: /certs/server.key
+    cors:
+      enabled: true
+      allowed_origins:
+        - https://localhost:3000
+      allowed_methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+        - Accept
+      exposed_headers:
+        - Content-Type
+      allow_credentials: true
+      max_age: 86400
+
+  admin:
+    host: 0.0.0.0
+    port: 4445
+    tls:
+      enabled: true
+      cert:
+        path: /certs/server-fullchain.crt
+      key:
+        path: /certs/server.key
+
+dsn: ${DSN}
+
+urls:
+  self:
+    issuer: https://localhost:4444/
+  login: https://localhost:8000/login
+  consent: https://localhost:8000/login/consent
+  logout: https://localhost:8000/login/logout
+
+secrets:
+  system:
+    - ${SECRETS_SYSTEM}
+
+log:
+  level: debug
+  format: json
+
+oidc:
+  subject_identifiers:
+    supported_types:
+      - public
+      - pairwise
+    pairwise:
+      salt: ${OIDC_SUBJECT_SALT}
+
+oauth2:
+  expose_internal_errors: true
+
+ttl:
+  access_token: 1h
+  refresh_token: 24h
+  id_token: 1h
+  auth_code: 10m
+

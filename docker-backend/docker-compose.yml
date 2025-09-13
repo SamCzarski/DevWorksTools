@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: hydra_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/hydra_db_password
+      POSTGRES_DB: hydra
+    secrets:
+      - hydra_db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - hydraguide
+
+
+  hydra-migrate:
+    image: oryd/hydra:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          hydra migrate sql --yes postgres://hydra_user:$(cat /run/secrets/hydra_db_password)@postgres:5432/hydra?sslmode=disable
+    environment:
+        DSN_FILE: /run/secrets/hydra_db_dsn
+    secrets:
+      - hydra_db_password
+      - hydra_db_dsn
+    networks:
+      - hydraguide
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:latest
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - hydraguide
+
+  hydra:
+    image: oryd/hydra:latest
+    entrypoint: ["/bin/sh", "/etc/hydra/run-hydra.sh"]
+    ports:
+      - "4444:4444"   # Public API
+      - "4445:4445"   # Admin API
+    secrets:
+      - hydra_db_dsn
+      - hydra_secret_system
+      - hydra_oidc_salt
+      - redis_url
+    volumes:
+      - ../certs:/certs
+      - ./hydra.yml:/etc/hydra/hydra.yml:ro
+      - ./run-hydra.sh:/etc/hydra/run-hydra.sh:ro
+    depends_on:
+      - postgres
+      - hydra-migrate
+      - redis
+    networks:
+      - hydraguide
+
+secrets:
+  hydra_db_password:
+    file: ./secrets/hydra_db_password.txt
+  hydra_db_dsn:
+    file: ./secrets/hydra_db_dsn.txt
+  hydra_secret_system:
+    file: ./secrets/hydra_secret_system.txt
+  hydra_oidc_salt:
+    file: ./secrets/hydra_oidc_salt.txt
+  redis_url:
+    file: ./secrets/redis_url.txt
+
+networks:
+  hydraguide:
+    external: true
+
+volumes:
+  pgdata:
+  redis_data:
+
+
