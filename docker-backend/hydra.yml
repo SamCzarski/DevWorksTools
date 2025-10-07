@@ -12,6 +12,7 @@ serve:
       enabled: true
       allowed_origins:
         - https://localhost:3000
+        - https://10.0.0.215:3000
       allowed_methods:
         - GET
         - POST
@@ -41,10 +42,10 @@ dsn: ${DSN}
 
 urls:
   self:
-    issuer: https://localhost:4444/
-  login: https://localhost:8000/login
-  consent: https://localhost:8000/login/consent
-  logout: https://localhost:8000/login/logout
+    issuer: https://10.0.0.215:4444/
+  login: https://10.0.0.215:8000/login
+  consent: https://10.0.0.215:8000/login/consent
+  logout: https://10.0.0.215:8000/login/logout
 
 secrets:
   system:

@@ -1,8 +1,19 @@
 CA_NAME: (Czarski)Dev Root CA
 SERVER_CN: localhost
+# SERVER_CN: 10.0.0.215
+SERVER_IP: 10.0.0.215
 KEYSTORE_ALIAS: dev-localhost-cert
 # DAYS_CA: 5 years
 DAYS_CA: 1825
 # DAYS_SERVER: ~2 years 3 months
 DAYS_SERVER: 825
 OUTDIR: certs
+
+
+SAN_DNS:
+  - localhost
+  - hydra
+  - host.docker.internal
+SAN_IP:
+  - 10.0.0.215
+

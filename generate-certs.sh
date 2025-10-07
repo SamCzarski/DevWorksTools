@@ -14,10 +14,8 @@ read_password_hidden() {
     local prompt="${1:-Password: }"
     local pw1 pw2
     while true; do
-        read -rsp "$prompt" pw1
-        echo
-        read -rsp "Confirm password: " pw2
-        echo
+        read -resp "$prompt" pw1
+        read -resp "Confirm password: " pw2
         if [[ "$pw1" != "$pw2" ]]; then
             echo "Passwords do not match. Try again."
         elif [[ -z "$pw1" ]]; then
@@ -47,10 +45,15 @@ get_config_value() {
 
 CA_NAME="$(get_config_value "CA_NAME")"
 SERVER_CN="$(get_config_value "SERVER_CN")"
+SERVER_IP="$(get_config_value "SERVER_IP")"
 KEYSTORE_ALIAS="$(get_config_value "KEYSTORE_ALIAS")"
 DAYS_CA="$(get_config_value "DAYS_CA")"
 DAYS_SERVER="$(get_config_value "DAYS_SERVER")"
 OUTDIR="$(get_config_value "OUTDIR")"
+
+
+
+
 
 # Prompt for PKCS#12 password
 P12_PASSWORD="$(read_password_hidden "Enter PKCS#12 password: ")"
@@ -86,6 +89,7 @@ subjectAltName = @alt_names
 DNS.1 = ${SERVER_CN}
 DNS.2 = hydra
 DNS.3 = host.docker.internal
+IP.1 = ${SERVER_IP}
 EOF
 
 echo "[5/8] Signing server cert with CA..."
@@ -110,6 +114,9 @@ cat "$OUTDIR/server.crt" "$OUTDIR/rootCA.crt" > "$OUTDIR/server-fullchain.crt"
 echo "[8/8] Creating server pem..."
 cat "$OUTDIR/server-fullchain.crt" "$OUTDIR/server.key" > "$OUTDIR/server.pem"
 
+chmod 644 "$OUTDIR/server.key"
+chmod 644 "$OUTDIR/server-fullchain.crt"
+
 echo "✅ Done!"
 echo "------------------------------------------------"
 echo "CA cert (import into Authorities, public): $OUTDIR/rootCA.crt"
@@ -119,3 +126,4 @@ echo "Hydra cert:                                 $OUTDIR/server-fullchain.crt"
 echo "Hydra key:                                  $OUTDIR/server.key"
 echo "Server pem:                                  $OUTDIR/server.pem"
 echo "------------------------------------------------"
+
